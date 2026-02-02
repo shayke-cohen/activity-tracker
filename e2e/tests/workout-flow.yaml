@@ -1,0 +1,163 @@
+# Workout Flow E2E Test
+# Tests the complete workout lifecycle
+
+name: Complete Workout Flow
+description: Test starting, monitoring, and ending a workout
+platform: ios
+app: com.activitytracker.ActivityTracker
+
+config:
+  autoAcceptAlerts: true
+  timeout: 30000
+
+steps:
+  # Step 1: Launch and verify dashboard
+  - name: Verify dashboard loads
+    inspect:
+      label: dashboard-loaded
+    assert:
+      type: visible
+      text: "Activity Tracker"
+
+  - name: Verify progress rings visible
+    assert:
+      type: visible
+      text: "TODAY'S PROGRESS"
+
+  - name: Verify step count displayed
+    assert:
+      type: visible
+      text: "Steps"
+
+  # Step 2: Navigate to workout selection
+  - name: Tap Quick Start Running
+    act:
+      action: tap
+      text: "Running"
+    wait:
+      for: element
+      text: "Start Workout"
+
+  - name: Verify countdown screen
+    assert:
+      type: visible
+      text: "Running"
+
+  # Step 3: Start workout
+  - name: Start the workout
+    act:
+      action: tap
+      text: "Start Workout"
+    wait:
+      for: duration
+      duration: 4000  # Wait for countdown
+
+  - name: Verify workout started
+    wait:
+      for: element
+      text: "Duration"
+    assert:
+      type: visible
+      text: "RUNNING"
+
+  # Step 4: Verify live metrics
+  - name: Check elapsed time is showing
+    assert:
+      type: visible
+      text: ":"  # Timer format contains colon
+
+  - name: Check calories metric
+    assert:
+      type: visible
+      text: "cal"
+
+  - name: Check heart rate display
+    assert:
+      type: visible
+      text: "bpm"
+
+  # Step 5: Pause workout
+  - name: Tap pause button
+    act:
+      action: tap
+      selector: "pause.fill"
+      strategy: "accessibility id"
+    wait:
+      for: element
+      text: "PAUSED"
+
+  - name: Verify paused state
+    assert:
+      type: visible
+      text: "PAUSED"
+
+  # Step 6: Resume workout
+  - name: Tap resume button
+    act:
+      action: tap
+      selector: "play.fill"
+      strategy: "accessibility id"
+    wait:
+      for: hidden
+      text: "PAUSED"
+
+  - name: Wait for workout to continue
+    wait:
+      for: duration
+      duration: 2000
+
+  # Step 7: End workout
+  - name: Tap stop button
+    act:
+      action: tap
+      selector: "stop.fill"
+      strategy: "accessibility id"
+    wait:
+      for: element
+      text: "End Workout"
+
+  - name: Confirm end workout
+    act:
+      action: tap
+      text: "End Workout"
+    wait:
+      for: element
+      text: "Workout Complete"
+
+  # Step 8: Verify summary screen
+  - name: Verify workout summary
+    assert:
+      type: visible
+      text: "Workout Complete"
+
+  - name: Verify duration shown
+    assert:
+      type: visible
+      text: "Duration"
+
+  - name: Verify calories shown in summary
+    assert:
+      type: visible
+      text: "Calories"
+
+  # Step 9: Save and dismiss
+  - name: Save workout
+    act:
+      action: tap
+      text: "Save Workout"
+    wait:
+      for: element
+      text: "Saved to Health"
+
+  - name: Dismiss summary
+    act:
+      action: tap
+      text: "Done"
+    wait:
+      for: element
+      text: "Activity Tracker"
+
+  # Step 10: Visual baseline
+  - name: Save final state baseline
+    inspect:
+      saveBaseline: "workout-complete-dashboard"

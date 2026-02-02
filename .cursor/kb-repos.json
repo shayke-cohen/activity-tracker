@@ -1,0 +1,12 @@
+{
+  "_comment": "Update these repos with your own. See kb-mcp docs for configuration options.",
+  "repos": [
+    {
+      "name": "team",
+      "repo": "YOUR_ORG/team-knowledge-base",
+      "description": "Team solutions for TypeScript, Node, React projects",
+      "categories": ["typescript", "node", "react"],
+      "primary": true
+    }
+  ]
+}

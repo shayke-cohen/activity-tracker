@@ -1,0 +1,71 @@
+---
+description: Guidelines for using MCP ai-tester for UI and E2E testing
+globs: ["**/*.e2e.*", "**/*.spec.*", "**/e2e/**", "**/tests/**"]
+alwaysApply: false
+---
+
+# MCP AI Tester Rules
+
+Use the `ai-tester` MCP server to create, run, and debug UI and E2E tests.
+
+## When to Use MCP Testing
+
+- ✅ Creating new E2E tests for user flows
+- ✅ Debugging failing UI tests
+- ✅ Validating UI changes after implementation
+- ✅ Capturing selectors for test automation
+- ✅ Visual regression checking
+
+## Workflow for AI-Assisted Test Creation
+
+### Step 1: Setup
+
+```bash
+# Ensure dev server is running
+yarn dev
+
+# Verify MCP servers are connected
+# Check: Cursor Settings → Features → MCP
+```
+
+### Step 2: Navigate and Explore
+
+Ask the AI to use `ai-tester` to:
+1. Navigate to the page under test
+2. Capture the element structure
+3. Interact with the UI elements
+
+### Step 3: Generate Test Code
+
+After interacting with the UI, ask the AI to generate test code based on observations.
+
+### Step 4: Debug Failures
+
+When tests fail, ask the AI to:
+1. Navigate to the failure URL
+2. Take a screenshot at the failure point
+3. Check console for JavaScript errors
+4. Check network requests for API issues
+5. Compare actual vs expected state
+
+## Best Practices
+
+### Selector Strategy
+
+- ✅ Use `data-testid` attributes (stable)
+- ⚠️ Accessible roles are okay as fallback
+- ❌ Avoid CSS classes (fragile)
+
+### Test Independence
+
+Each test should be independent and not depend on previous test state.
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Element not found | Ask AI to re-capture, check selector |
+| Timeout errors | Add explicit waits |
+| Flaky tests | Use proper wait conditions |
+| MCP disconnected | Restart Cursor |
+| Page not loading | Check dev server running |

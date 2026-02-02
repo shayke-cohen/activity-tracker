@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "ai-native-engineer": {
+      "command": "npx",
+      "args": ["@shaykec/ai-native-engineer"]
+    },
+    "ai-tester": {
+      "command": "npx",
+      "args": ["-y", "-p", "@shaykec/ai-tester", "ai-tester-mcp"],
+      "env": {
+        "MCP_LOG_LEVEL": "info"
+      }
+    },
+    "octocode": {
+      "command": "npx",
+      "args": ["octocode-mcp@latest"]
+    },
+    "kb-mcp": {
+      "command": "npx",
+      "args": ["-y", "@shaykec/kb-mcp"],
+      "env": {
+        "KB_CONFIG": ".cursor/kb-repos.json"
+      }
+    }
+  }
+}

@@ -1,0 +1,115 @@
+# Settings E2E Test
+# Tests the settings and profile functionality
+
+name: Settings Flow
+description: Test settings navigation and goal configuration
+platform: ios
+app: com.activitytracker.ActivityTracker
+
+config:
+  autoAcceptAlerts: true
+  timeout: 30000
+
+steps:
+  # Navigate to settings
+  - name: Launch and go to Profile tab
+    inspect:
+      label: home-screen
+    act:
+      action: tap
+      text: "Profile"
+    wait:
+      for: element
+      text: "Settings"
+
+  # Verify goals section
+  - name: Verify Goals section
+    assert:
+      type: visible
+      text: "Goals"
+
+  - name: Verify Daily Steps setting
+    assert:
+      type: visible
+      text: "Daily Steps"
+
+  - name: Verify Calorie Goal setting
+    assert:
+      type: visible
+      text: "Daily Calories"
+
+  # Test step goal picker
+  - name: Tap Daily Steps
+    act:
+      action: tap
+      text: "Daily Steps"
+    wait:
+      for: element
+      text: "Set Goal"
+
+  - name: Verify goal picker
+    assert:
+      type: visible
+      text: "Daily Step Goal"
+
+  - name: Dismiss picker
+    act:
+      action: tap
+      text: "Done"
+    wait:
+      for: element
+      text: "Settings"
+
+  # Verify health section
+  - name: Verify Health section
+    assert:
+      type: visible
+      text: "Health"
+
+  - name: Verify HealthKit connection
+    assert:
+      type: visible
+      text: "HealthKit"
+
+  # Navigate to heart rate zones
+  - name: Tap Heart Rate Zones
+    act:
+      action: tap
+      text: "Heart Rate Zones"
+    wait:
+      for: element
+      text: "Zone 1"
+
+  - name: Verify zones displayed
+    assert:
+      type: visible
+      text: "Recovery"
+
+  - name: Go back to settings
+    act:
+      action: swipe
+      direction: right
+    wait:
+      for: element
+      text: "Settings"
+
+  # Verify notifications section
+  - name: Scroll to notifications
+    act:
+      action: swipe
+      direction: up
+
+  - name: Verify Notifications section
+    assert:
+      type: visible
+      text: "Notifications"
+
+  - name: Verify reminder toggle
+    assert:
+      type: visible
+      text: "Workout Reminders"
+
+  # Save baseline
+  - name: Save settings baseline
+    inspect:
+      saveBaseline: "settings-screen"

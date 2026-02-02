@@ -1,0 +1,119 @@
+---
+description: Code style and formatting conventions
+globs: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.py", "**/*.swift", "**/*.kt"]
+alwaysApply: false
+---
+
+# Code Style Guidelines
+
+## General Principles
+
+- **Consistency** - Match existing code style in the file/project
+- **Readability** - Write code that's easy to understand
+- **Simplicity** - Prefer simple solutions over clever ones
+
+## Naming Conventions
+
+### Variables and Functions
+- Use `camelCase` for variables and functions (JS/TS)
+- Use `snake_case` for Python
+- Use descriptive names that indicate purpose
+
+```typescript
+// Good
+const userProfile = await fetchUserProfile(userId);
+const isAuthenticated = checkAuthStatus();
+
+// Bad
+const up = await fup(id);
+const auth = check();
+```
+
+### Classes and Types
+- Use `PascalCase` for classes, interfaces, types
+- Prefix interfaces with `I` only if project convention
+
+```typescript
+// Good
+class UserService {}
+interface UserProfile {}
+type AuthStatus = 'authenticated' | 'anonymous';
+```
+
+### Constants
+- Use `UPPER_SNAKE_CASE` for true constants
+- Use `camelCase` for configuration objects
+
+```typescript
+const MAX_RETRY_ATTEMPTS = 3;
+const apiConfig = { baseUrl: '...' };
+```
+
+## File Organization
+
+1. Imports (external, then internal)
+2. Types/Interfaces
+3. Constants
+4. Main code (functions, classes)
+5. Exports
+
+## Comments
+
+```typescript
+// Single line for brief explanations
+
+/**
+ * Multi-line for function/class documentation
+ * @param userId - The user's unique identifier
+ * @returns The user profile or null if not found
+ */
+
+// TODO: Description of what needs to be done
+// FIXME: Description of bug to fix
+// NOTE: Important information about the code
+```
+
+## Error Handling
+
+```typescript
+// Good - specific error handling
+try {
+  const data = await fetchData();
+} catch (error) {
+  if (error instanceof NetworkError) {
+    // Handle network errors
+  } else if (error instanceof ValidationError) {
+    // Handle validation errors
+  } else {
+    throw error; // Re-throw unknown errors
+  }
+}
+
+// Bad - swallowing errors
+try {
+  const data = await fetchData();
+} catch (error) {
+  // Silent failure
+}
+```
+
+## Async/Await
+
+- Prefer `async/await` over `.then()` chains
+- Always handle rejections
+- Use `Promise.all()` for parallel operations
+
+## Imports
+
+```typescript
+// 1. External packages
+import React from 'react';
+import { useState } from 'react';
+
+// 2. Internal absolute imports
+import { UserService } from '@/services/user';
+
+// 3. Relative imports
+import { Button } from './Button';
+import styles from './styles.module.css';
+```

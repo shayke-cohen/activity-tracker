@@ -1,0 +1,50 @@
+---
+description: Global rules that always apply to all files
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Global Rules
+
+## Before Starting ANY Task
+
+1. **Read AGENTS.md** - Understand project context, commands, and boundaries
+2. **Check knowledge/** - Look for relevant known issues and lessons learned
+3. **Understand the scope** - Know what files you can and cannot modify
+
+## Code Quality
+
+1. **Write clean, readable code** - Prioritize clarity over cleverness
+2. **Follow existing patterns** - Match the style of surrounding code
+3. **Add meaningful comments** - Explain "why", not "what"
+4. **Keep functions small** - Single responsibility principle
+
+## Git Workflow
+
+1. **Never commit directly to main** - Always use feature branches
+2. **Write descriptive commit messages** - Follow conventional commits format
+3. **Reference issues** - Include issue numbers in commits and PRs
+
+## Testing
+
+1. **Run tests before committing** - `npm test` or equivalent
+2. **Add tests for new features** - Don't skip this step
+3. **Write regression tests for bugs** - Prevent recurrence
+
+## Documentation
+
+1. **Update docs when changing behavior** - Keep README and AGENTS.md current
+2. **Document breaking changes** - Note in PR and changelog
+3. **Add knowledge entries** - Record non-trivial solutions
+
+## Security
+
+1. **Never commit secrets** - Use environment variables
+2. **Validate all inputs** - Don't trust external data
+3. **Follow least privilege** - Request minimal permissions
+
+## Communication
+
+1. **Post progress updates** - Use GitHub issue comments
+2. **Ask when uncertain** - Don't guess on important decisions
+3. **Document blockers immediately** - Don't wait to report issues

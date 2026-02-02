@@ -1,0 +1,55 @@
+---
+description: Testing constraints and requirements
+globs: ["**/*.test.*", "**/*.spec.*", "**/tests/**", "**/__tests__/**"]
+alwaysApply: false
+---
+
+# Testing Rules
+
+## ALWAYS Do
+
+1. **Write tests with new features**
+   - Every new function with logic needs a unit test
+   - Every new API endpoint needs an integration test
+   - Every bug fix needs a regression test
+
+2. **Run tests before committing**
+   ```bash
+   yarn lint && yarn typecheck && yarn test
+   ```
+
+3. **Write regression tests for bugs**
+   - First write a failing test that reproduces the bug
+   - Then fix the bug and verify test passes
+   - Include bug reference in test name: `it('should handle null - fixes #123')`
+
+4. **Test edge cases**
+   - Empty inputs
+   - Null/undefined values
+   - Boundary conditions
+   - Error scenarios
+
+5. **Keep tests fast**
+   - Mock external services
+   - Use test databases
+   - Avoid sleep/timeouts
+
+## NEVER Do
+
+1. ❌ **Skip tests to save time** - Technical debt accumulates
+2. ❌ **Commit with failing tests** - Fix or skip with reason
+3. ❌ **Write tests that depend on order** - Tests must be independent
+4. ❌ **Test implementation details** - Test behavior, not internals
+5. ❌ **Leave console.log in tests** - Clean up debug statements
+
+## Coverage Requirements
+
+| Metric | Minimum | Target |
+|--------|---------|--------|
+| Line coverage | 70% | 85% |
+| Branch coverage | 60% | 80% |
+| Critical paths | 100% | 100% |
+
+---
+
+For detailed testing patterns, AAA structure, mocking guidelines, and framework-specific testing, see the `test-driven-development` and `webapp-testing` skills.

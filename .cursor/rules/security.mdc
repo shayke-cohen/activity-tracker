@@ -1,0 +1,90 @@
+---
+description: Security boundaries and forbidden operations
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Security Rules
+
+## NEVER Do These Things
+
+### Secrets & Credentials
+1. ❌ **Never hardcode secrets** - Use environment variables
+2. ❌ **Never commit .env files** - They're in .gitignore for a reason
+3. ❌ **Never log sensitive data** - No passwords, tokens, or PII in logs
+4. ❌ **Never expose API keys in client code** - Use server-side proxies
+
+### Data Handling
+1. ❌ **Never trust user input** - Always validate and sanitize
+2. ❌ **Never use string concatenation for SQL** - Use parameterized queries
+3. ❌ **Never disable SSL verification** - Even in development
+4. ❌ **Never store passwords in plain text** - Use proper hashing (bcrypt)
+
+### Authentication
+1. ❌ **Never roll your own auth** - Use established libraries
+2. ❌ **Never use weak session tokens** - Use cryptographically secure generation
+3. ❌ **Never expose user IDs in URLs** - Use UUIDs or opaque identifiers
+
+## ALWAYS Do These Things
+
+### Input Validation
+```typescript
+// Good - validate all inputs
+const schema = z.object({
+  email: z.string().email(),
+  age: z.number().min(0).max(150),
+});
+
+const validated = schema.parse(userInput);
+```
+
+### Secret Management
+```typescript
+// Good - use environment variables
+const apiKey = process.env.API_KEY;
+if (!apiKey) {
+  throw new Error('API_KEY environment variable is required');
+}
+```
+
+### SQL Queries
+```typescript
+// Good - parameterized query
+const user = await db.query(
+  'SELECT * FROM users WHERE id = $1',
+  [userId]
+);
+
+// Bad - string concatenation (SQL injection risk)
+const user = await db.query(
+  `SELECT * FROM users WHERE id = '${userId}'`
+);
+```
+
+### Error Messages
+```typescript
+// Good - generic error to user, detailed log
+try {
+  await authenticate(credentials);
+} catch (error) {
+  logger.error('Auth failed', { error, userId });
+  throw new Error('Authentication failed'); // Generic message
+}
+
+// Bad - exposing internals
+throw new Error(`User ${email} not found in database`);
+```
+
+## Files You Cannot Modify
+
+- `.env` files (except .env.example)
+- Production configuration files
+- SSL certificates and keys
+- Authentication provider configs
+
+## Reporting Security Issues
+
+If you discover a security vulnerability:
+1. Do NOT create a public GitHub issue
+2. Document in SECURITY.md contact section
+3. Notify maintainers directly

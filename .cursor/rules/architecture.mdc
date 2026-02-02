@@ -1,0 +1,90 @@
+---
+description: Architecture patterns and constraints
+globs: ["**/src/**", "**/lib/**", "**/app/**"]
+alwaysApply: false
+---
+
+# Architecture Rules
+
+## Module Boundaries
+
+### Allowed Dependencies
+```
+UI Layer → Business Logic → Data Layer → External Services
+   ↓              ↓              ↓
+ (can import from layers below, not above)
+```
+
+### Forbidden Dependencies
+- ❌ Data layer importing from UI layer
+- ❌ Circular dependencies between modules
+- ❌ Direct database access from UI components
+
+## Directory Structure Conventions
+
+```
+src/
+├── components/     # Reusable UI components
+├── pages/          # Page-level components (if applicable)
+├── services/       # Business logic and API calls
+├── utils/          # Pure utility functions
+├── types/          # Type definitions
+├── hooks/          # Custom React hooks (if React)
+└── config/         # Configuration files
+```
+
+## Component Guidelines
+
+### Keep Components Focused
+- One primary responsibility per component
+- Extract complex logic into hooks or services
+- Prefer composition over inheritance
+
+### State Management
+- Keep state as local as possible
+- Lift state only when necessary
+- Use context for truly global state
+
+## Service Layer
+
+### API Services
+- Centralize API calls in service files
+- Handle errors consistently
+- Return typed responses
+
+```typescript
+// Good
+class UserService {
+  async getUser(id: string): Promise<User> {
+    const response = await api.get(`/users/${id}`);
+    return response.data;
+  }
+}
+
+// Bad - API calls scattered in components
+const Component = () => {
+  useEffect(() => {
+    fetch('/api/users/1').then(...);
+  }, []);
+};
+```
+
+## Error Boundaries
+
+- Wrap major sections in error boundaries
+- Provide meaningful fallback UIs
+- Log errors for debugging
+
+## Performance Considerations
+
+- Lazy load large components/routes
+- Memoize expensive computations
+- Avoid unnecessary re-renders
+- Use pagination for large lists
+
+## Security Patterns
+
+- Sanitize user inputs
+- Use parameterized queries
+- Implement proper authentication checks
+- Follow OWASP guidelines
