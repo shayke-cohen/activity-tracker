@@ -1,0 +1,59 @@
+# Dark Mode E2E Test
+# Run with: maestro test dark-mode.yaml
+# Note: Set simulator to dark mode first: xcrun simctl ui booted appearance dark
+
+appId: com.activitytracker.ActivityTracker
+
+---
+- launchApp
+
+# Verify dashboard loads in dark mode
+- assertVisible: "Activity Tracker"
+
+- takeScreenshot: "dark-mode-dashboard"
+
+# Check all main sections are visible
+- assertVisible: "TODAY'S PROGRESS"
+- assertVisible: "QUICK START"
+- assertVisible: "RECENT ACTIVITY"
+
+# Navigate to Awards tab
+- tapOn:
+    id: "trophy.fill"
+
+- assertVisible: "Achievements"
+
+- takeScreenshot: "dark-mode-achievements"
+
+# Navigate to History
+- tapOn:
+    id: "clock.fill"
+
+- assertVisible: "History"
+
+- takeScreenshot: "dark-mode-history"
+
+# Navigate to Settings
+- tapOn:
+    id: "person.fill"
+
+- assertVisible: "Settings"
+
+- takeScreenshot: "dark-mode-settings"
+
+# Open activity selection
+- tapOn:
+    id: "house.fill"
+
+- tapOn: "More"
+
+- assertVisible: "Start Workout"
+
+- takeScreenshot: "dark-mode-activity-selection"
+
+- tapOn: "Cancel"
+
+# Return to home
+- assertVisible: "Activity Tracker"
+
+- takeScreenshot: "dark-mode-complete"

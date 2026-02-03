@@ -9,11 +9,11 @@ xcuserdata/
 DerivedData/
 build/
 
-# Generated screenshots from E2E tests
-*.png
+# Generated screenshots from E2E tests (in root)
+/*.png
 
-# Maestro test output
-tests/
+# Maestro test output (in root)
+/tests/
 
 # macOS
 .DS_Store
