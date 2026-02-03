@@ -1,0 +1,49 @@
+# Activity Selection E2E Test - Tests all activity categories
+# Run with: maestro test activity-selection.yaml
+
+appId: com.activitytracker.ActivityTracker
+
+---
+- launchApp
+
+- assertVisible: "Activity Tracker"
+
+# Open More activities
+- tapOn: "More"
+
+- assertVisible: "Start Workout"
+
+# Verify CARDIO section
+- assertVisible: "CARDIO"
+- assertVisible: "Steps"
+- assertVisible: "Running"
+- assertVisible: "Walking"
+- assertVisible: "Cycling"
+- assertVisible: "Swimming"
+- assertVisible: "Hiking"
+
+# Verify GYM & STRENGTH section
+- assertVisible: "GYM & STRENGTH"
+- assertVisible: "Strength Training"
+- assertVisible: "HIIT"
+
+# Scroll to see more
+- scroll
+
+# Verify MIND & BODY section
+- assertVisible: "MIND & BODY"
+- assertVisible: "Yoga"
+- assertVisible: "Pilates"
+- assertVisible: "Stretching"
+
+# Verify OTHER section
+- assertVisible: "OTHER"
+
+- takeScreenshot: "all-activities"
+
+# Cancel
+- tapOn: "Cancel"
+
+- assertVisible: "Activity Tracker"
+
+- takeScreenshot: "activity-selection-complete"

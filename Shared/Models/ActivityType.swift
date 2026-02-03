@@ -54,6 +54,28 @@ enum ActivityType: String, CaseIterable, Codable, Identifiable {
         }
     }
     
+    /// Initialize from HKWorkoutActivityType
+    init?(from hkType: HKWorkoutActivityType) {
+        switch hkType {
+        case .walking: self = .walking
+        case .running: self = .running
+        case .cycling: self = .cycling
+        case .swimming: self = .swimming
+        case .hiking: self = .hiking
+        case .traditionalStrengthTraining: self = .strengthTraining
+        case .highIntensityIntervalTraining: self = .hiit
+        case .functionalStrengthTraining: self = .functionalTraining
+        case .coreTraining: self = .coreTraining
+        case .rowing: self = .rowing
+        case .elliptical: self = .elliptical
+        case .stairClimbing: self = .stairClimbing
+        case .yoga: self = .yoga
+        case .pilates: self = .pilates
+        case .flexibility: self = .stretching
+        default: self = .other
+        }
+    }
+    
     // MARK: - Display Properties
     
     var displayName: String {
@@ -166,6 +188,10 @@ enum ActivityCategory: String, CaseIterable {
     case gym = "Gym & Strength"
     case mindBody = "Mind & Body"
     case other = "Other"
+    
+    var displayName: String {
+        rawValue
+    }
     
     var activities: [ActivityType] {
         ActivityType.allCases.filter { $0.category == self }

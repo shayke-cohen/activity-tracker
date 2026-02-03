@@ -88,6 +88,28 @@ struct Activity: Identifiable, Codable, Hashable {
         self.locationName = locationName
         self.routeData = routeData
     }
+    
+    /// Initialize from HealthKit HKWorkout
+    init?(from hkWorkout: HKWorkout) {
+        self.id = UUID()
+        self.type = ActivityType(from: hkWorkout.workoutActivityType) ?? .other
+        self.startDate = hkWorkout.startDate
+        self.endDate = hkWorkout.endDate
+        self.duration = hkWorkout.duration
+        self.calories = hkWorkout.totalEnergyBurned?.doubleValue(for: .kilocalorie()) ?? 0
+        self.distance = hkWorkout.totalDistance?.doubleValue(for: .meter())
+        self.steps = nil // Would need to query separately
+        self.averageHeartRate = nil // Would need to query from workout samples
+        self.maxHeartRate = nil
+        // Get swimming stroke count as laps
+        if let strokeCount = hkWorkout.totalSwimmingStrokeCount {
+            self.laps = Int(strokeCount.doubleValue(for: HKUnit.count()))
+        } else {
+            self.laps = nil
+        }
+        self.locationName = nil
+        self.routeData = nil
+    }
 }
 
 // MARK: - Sample Data
@@ -110,8 +132,8 @@ extension Activity {
         endDate: Date(),
         calories: 380,
         distance: 1200,
-        laps: 48,
-        averageHeartRate: 142
+        averageHeartRate: 142,
+        laps: 48
     )
     
     static let sampleCycle = Activity(

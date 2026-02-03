@@ -1,7 +1,7 @@
 import Foundation
 import HealthKit
 
-/// Service for managing workout sessions
+/// Service for managing workout sessions with iOS 26 HKLiveWorkoutBuilder
 @MainActor
 class WorkoutService: ObservableObject {
     static let shared = WorkoutService()
@@ -17,7 +17,7 @@ class WorkoutService: ObservableObject {
     
     // MARK: - Start Workout
     
-    /// Start a new workout session
+    /// Start a new workout session with HKLiveWorkoutBuilder
     func startWorkout(type: ActivityType) async throws {
         let configuration = HKWorkoutConfiguration()
         configuration.activityType = type.healthKitType
@@ -26,7 +26,7 @@ class WorkoutService: ObservableObject {
         // For swimming
         if type == .swimming {
             configuration.swimmingLocationType = .pool
-            configuration.lapLength = HKQuantity(unit: .meter(), doubleValue: 25) // Standard pool
+            configuration.lapLength = HKQuantity(unit: .meter(), doubleValue: 25)
         }
         
         do {
@@ -96,7 +96,7 @@ class WorkoutService: ObservableObject {
         let endDate = Date()
         try await builder.endCollection(at: endDate)
         
-        // Get the final workout
+        // Get the final workout from HealthKit
         do {
             try await builder.finishWorkout()
         } catch {
@@ -105,6 +105,18 @@ class WorkoutService: ObservableObject {
         
         // Get our activity from the session
         let activity = currentWorkout?.end()
+        
+        // Save to local storage
+        if let activity = activity {
+            WorkoutStorageService.shared.saveWorkout(activity)
+            
+            // Update streak
+            StreakService.shared.recordActivity()
+            
+            // Check for achievements
+            let streak = StreakService.shared.streakData
+            _ = AchievementService.shared.checkAchievements(for: activity, streak: streak)
+        }
         
         // End Live Activity
         await LiveActivityManager.shared.endActivity()
@@ -200,7 +212,6 @@ class WorkoutBuilderDelegate: NSObject, HKLiveWorkoutBuilderDelegate {
     static let shared = WorkoutBuilderDelegate()
     
     func workoutBuilder(_ workoutBuilder: HKLiveWorkoutBuilder, didCollectDataOf collectedTypes: Set<HKSampleType>) {
-        // Handle collected data
         for type in collectedTypes {
             guard let quantityType = type as? HKQuantityType else { continue }
             

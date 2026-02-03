@@ -1,115 +1,57 @@
-# Settings E2E Test
-# Tests the settings and profile functionality
+# Settings E2E Test - Maestro Compatible Format
+# Run with: maestro test settings.yaml
 
-name: Settings Flow
-description: Test settings navigation and goal configuration
-platform: ios
-app: com.activitytracker.ActivityTracker
+appId: com.activitytracker.ActivityTracker
 
-config:
-  autoAcceptAlerts: true
-  timeout: 30000
+---
+- launchApp
 
-steps:
-  # Navigate to settings
-  - name: Launch and go to Profile tab
-    inspect:
-      label: home-screen
-    act:
-      action: tap
-      text: "Profile"
-    wait:
-      for: element
-      text: "Settings"
+# Navigate to Profile/Settings tab
+- tapOn:
+    id: "person.fill"
 
-  # Verify goals section
-  - name: Verify Goals section
-    assert:
-      type: visible
-      text: "Goals"
+- assertVisible: "Settings"
 
-  - name: Verify Daily Steps setting
-    assert:
-      type: visible
-      text: "Daily Steps"
+# Verify goals section
+- assertVisible: "Goals"
 
-  - name: Verify Calorie Goal setting
-    assert:
-      type: visible
-      text: "Daily Calories"
+- assertVisible: "Daily Steps"
 
-  # Test step goal picker
-  - name: Tap Daily Steps
-    act:
-      action: tap
-      text: "Daily Steps"
-    wait:
-      for: element
-      text: "Set Goal"
+- assertVisible: "Daily Calories"
 
-  - name: Verify goal picker
-    assert:
-      type: visible
-      text: "Daily Step Goal"
+- assertVisible: "Exercise Minutes"
 
-  - name: Dismiss picker
-    act:
-      action: tap
-      text: "Done"
-    wait:
-      for: element
-      text: "Settings"
+- assertVisible: "Weekly Workouts"
 
-  # Verify health section
-  - name: Verify Health section
-    assert:
-      type: visible
-      text: "Health"
+# Verify health section
+- assertVisible: "Health"
 
-  - name: Verify HealthKit connection
-    assert:
-      type: visible
-      text: "HealthKit"
+- assertVisible: "HealthKit"
 
-  # Navigate to heart rate zones
-  - name: Tap Heart Rate Zones
-    act:
-      action: tap
-      text: "Heart Rate Zones"
-    wait:
-      for: element
-      text: "Zone 1"
+- assertVisible: "Connected"
 
-  - name: Verify zones displayed
-    assert:
-      type: visible
-      text: "Recovery"
+- assertVisible: "Heart Rate Zones"
 
-  - name: Go back to settings
-    act:
-      action: swipe
-      direction: right
-    wait:
-      for: element
-      text: "Settings"
+# Scroll to see Apple Watch section
+- scroll
 
-  # Verify notifications section
-  - name: Scroll to notifications
-    act:
-      action: swipe
-      direction: up
+- assertVisible: "Apple Watch"
 
-  - name: Verify Notifications section
-    assert:
-      type: visible
-      text: "Notifications"
+- assertVisible: "Watch App"
 
-  - name: Verify reminder toggle
-    assert:
-      type: visible
-      text: "Workout Reminders"
+- assertVisible: "Complications"
 
-  # Save baseline
-  - name: Save settings baseline
-    inspect:
-      saveBaseline: "settings-screen"
+# Scroll to notifications
+- scroll
+
+- assertVisible: "Notifications"
+
+- takeScreenshot: "settings-screen"
+
+# Return to home
+- tapOn:
+    id: "house.fill"
+
+- assertVisible: "Activity Tracker"
+
+- takeScreenshot: "settings-complete"

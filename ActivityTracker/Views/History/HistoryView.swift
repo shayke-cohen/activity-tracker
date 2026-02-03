@@ -3,6 +3,7 @@ import SwiftUI
 /// History tab showing past workouts
 struct HistoryView: View {
     @EnvironmentObject var healthKitService: HealthKitService
+    @EnvironmentObject var workoutStorageService: WorkoutStorageService
     
     @State private var workouts: [Activity] = []
     @State private var selectedFilter: ActivityType?
@@ -155,17 +156,72 @@ struct HistoryView: View {
     // MARK: - Data Loading
     
     private func loadInitialWorkouts() async {
-        // Load sample data for now
-        workouts = [
-            Activity.sampleRun,
-            Activity.sampleSwim,
-            Activity.sampleCycle
-        ]
+        isLoading = true
+        
+        var allWorkouts: [Activity] = []
+        
+        // Try to load from HealthKit
+        do {
+            let hkWorkouts = try await healthKitService.queryWorkouts(days: 30)
+            allWorkouts.append(contentsOf: hkWorkouts)
+        } catch {
+            print("Failed to load workouts from HealthKit: \(error)")
+        }
+        
+        // Also load from local storage and merge
+        let localWorkouts = workoutStorageService.getWorkouts(days: 30)
+        
+        // Merge and deduplicate by combining both sources
+        // Use a Set to track which workouts we've added (by start date and type)
+        var seen = Set<String>()
+        var merged: [Activity] = []
+        
+        for workout in allWorkouts + localWorkouts {
+            let key = "\(workout.type.rawValue)-\(Int(workout.startDate.timeIntervalSince1970))"
+            if !seen.contains(key) {
+                seen.insert(key)
+                merged.append(workout)
+            }
+        }
+        
+        // Sort by start date (most recent first)
+        workouts = merged.sorted { $0.startDate > $1.startDate }
+        
         isLoading = false
     }
     
     private func loadWorkouts(days: Int) {
-        // Would load from HealthKit
+        Task {
+            isLoading = true
+            
+            var allWorkouts: [Activity] = []
+            
+            do {
+                let hkWorkouts = try await healthKitService.queryWorkouts(days: days)
+                allWorkouts.append(contentsOf: hkWorkouts)
+            } catch {
+                print("Failed to load workouts from HealthKit: \(error)")
+            }
+            
+            // Also load from local storage
+            let localWorkouts = workoutStorageService.getWorkouts(days: days)
+            
+            // Merge and deduplicate
+            var seen = Set<String>()
+            var merged: [Activity] = []
+            
+            for workout in allWorkouts + localWorkouts {
+                let key = "\(workout.type.rawValue)-\(Int(workout.startDate.timeIntervalSince1970))"
+                if !seen.contains(key) {
+                    seen.insert(key)
+                    merged.append(workout)
+                }
+            }
+            
+            workouts = merged.sorted { $0.startDate > $1.startDate }
+            
+            isLoading = false
+        }
     }
 }
 
@@ -312,4 +368,5 @@ struct WorkoutDetailView: View {
 #Preview {
     HistoryView()
         .environmentObject(HealthKitService.shared)
+        .environmentObject(WorkoutStorageService.shared)
 }

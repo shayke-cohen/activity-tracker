@@ -64,7 +64,7 @@ struct WorkoutActivityAttributes: ActivityAttributes {
 class LiveActivityManager: ObservableObject {
     static let shared = LiveActivityManager()
     
-    private var currentActivity: Activity<WorkoutActivityAttributes>?
+    private var currentActivity: ActivityKit.Activity<WorkoutActivityAttributes>?
     
     private init() {}
     
@@ -96,7 +96,7 @@ class LiveActivityManager: ObservableObject {
         )
         
         do {
-            let activity = try Activity.request(
+            let activity = try ActivityKit.Activity.request(
                 attributes: attributes,
                 content: .init(state: initialState, staleDate: nil),
                 pushType: nil

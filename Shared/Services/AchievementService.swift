@@ -178,4 +178,19 @@ class AchievementService: ObservableObject {
     func recentUnlocks(limit: Int = 5) -> [UnlockedAchievement] {
         Array(unlockedAchievements.sorted { $0.unlockedDate > $1.unlockedDate }.prefix(limit))
     }
+    
+    // MARK: - Testing Support
+    
+    /// Reset all state (for testing only)
+    func resetForTesting() {
+        unlockedAchievements = []
+        recentlyUnlocked = nil
+        totalWorkouts = 0
+        totalDistance = 0
+        totalSteps = 0
+        morningWorkouts = 0
+        weekendWorkouts = 0
+        differentActivities = []
+        userDefaults.removeObject(forKey: unlockedKey)
+    }
 }

@@ -1,0 +1,118 @@
+name: ActivityTracker
+options:
+  bundleIdPrefix: com.activitytracker
+  deploymentTarget:
+    iOS: "26.0"
+    watchOS: "26.0"
+  xcodeVersion: "15.0"
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    ENABLE_USER_SCRIPT_SANDBOXING: false
+
+targets:
+  # Main iOS App
+  ActivityTracker:
+    type: application
+    platform: iOS
+    sources:
+      - path: ActivityTracker
+        excludes:
+          - "**/*.xcassets"
+      - path: Shared
+        excludes:
+          - "**/*.xcassets"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.activitytracker.ActivityTracker
+        INFOPLIST_FILE: ActivityTracker/Info.plist
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: ""
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: NO
+    info:
+      path: ActivityTracker/Info.plist
+      properties:
+        CFBundleDisplayName: Activity Tracker
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        UILaunchScreen: {}
+        NSHealthShareUsageDescription: "Activity Tracker needs access to your health data to track workouts and display your fitness metrics."
+        NSHealthUpdateUsageDescription: "Activity Tracker needs to save your workout data to Apple Health."
+        NSMotionUsageDescription: "Activity Tracker uses motion data to count your steps and track movement."
+        UISupportsDocumentBrowser: false
+    entitlements:
+      path: ActivityTracker/ActivityTracker.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
+    dependencies:
+      - target: ActivityTrackerWidgets
+        embed: true
+        codeSign: true
+
+  # Widget Extension
+  ActivityTrackerWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: ActivityTrackerWidgets
+      - path: Shared/Models
+      - path: Shared/ActivityAttributes.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.activitytracker.ActivityTracker.Widgets
+        INFOPLIST_FILE: ActivityTrackerWidgets/Info.plist
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: ""
+    info:
+      path: ActivityTrackerWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: ActivityTracker Widgets
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+
+  # Unit Tests
+  ActivityTrackerTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: ActivityTrackerTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.activitytracker.ActivityTrackerTests
+        INFOPLIST_FILE: ActivityTrackerTests/Info.plist
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: ""
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/ActivityTracker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ActivityTracker"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+    info:
+      path: ActivityTrackerTests/Info.plist
+      properties:
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+    dependencies:
+      - target: ActivityTracker
+
+schemes:
+  ActivityTracker:
+    build:
+      targets:
+        ActivityTracker: all
+        ActivityTrackerWidgets: all
+        ActivityTrackerTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      gatherCoverageData: true
+      targets:
+        - name: ActivityTrackerTests
+          parallelizable: true
+          randomExecutionOrder: true
+    archive:
+      config: Release

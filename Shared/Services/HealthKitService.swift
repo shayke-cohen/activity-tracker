@@ -184,6 +184,63 @@ class HealthKitService: ObservableObject {
             healthStore.execute(query)
         }
     }
+    
+    /// Query workouts and convert to Activity models
+    func queryActivities(from startDate: Date, to endDate: Date) async throws -> [Activity] {
+        let hkWorkouts = try await queryWorkouts(from: startDate, to: endDate)
+        return hkWorkouts.compactMap { Activity(from: $0) }
+    }
+    
+    /// Query today's workouts
+    func queryTodayWorkouts() async throws -> [Activity] {
+        let startOfDay = Calendar.current.startOfDay(for: Date())
+        return try await queryActivities(from: startOfDay, to: Date())
+    }
+    
+    /// Query recent workouts (last 7 days)
+    func queryRecentWorkouts(limit: Int = 10) async throws -> [Activity] {
+        let startDate = Calendar.current.date(byAdding: .day, value: -7, to: Date()) ?? Date()
+        let activities = try await queryActivities(from: startDate, to: Date())
+        return Array(activities.prefix(limit))
+    }
+    
+    /// Query workouts for past N days
+    func queryWorkouts(days: Int) async throws -> [Activity] {
+        let startDate = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+        return try await queryActivities(from: startDate, to: Date())
+    }
+    
+    /// Query today's exercise minutes
+    func queryTodayExerciseMinutes() async throws -> Double {
+        let workouts = try await queryTodayWorkouts()
+        let totalSeconds = workouts.reduce(0.0) { $0 + $1.duration }
+        return totalSeconds / 60
+    }
+    
+    /// Query today's total distance (walking + running)
+    func queryTodayDistance() async throws -> Double {
+        let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)!
+        let startOfDay = Calendar.current.startOfDay(for: Date())
+        let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: Date(), options: .strictStartDate)
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            let query = HKStatisticsQuery(
+                quantityType: distanceType,
+                quantitySamplePredicate: predicate,
+                options: .cumulativeSum
+            ) { _, result, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                
+                let distance = result?.sumQuantity()?.doubleValue(for: .meter()) ?? 0
+                continuation.resume(returning: distance)
+            }
+            
+            healthStore.execute(query)
+        }
+    }
 }
 
 // MARK: - Errors

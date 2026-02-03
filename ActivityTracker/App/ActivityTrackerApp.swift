@@ -7,6 +7,7 @@ struct ActivityTrackerApp: App {
     @StateObject private var workoutService = WorkoutService.shared
     @StateObject private var achievementService = AchievementService.shared
     @StateObject private var streakService = StreakService.shared
+    @StateObject private var workoutStorageService = WorkoutStorageService.shared
     
     var body: some Scene {
         WindowGroup {
@@ -16,6 +17,7 @@ struct ActivityTrackerApp: App {
                 .environmentObject(workoutService)
                 .environmentObject(achievementService)
                 .environmentObject(streakService)
+                .environmentObject(workoutStorageService)
                 .task {
                     await requestPermissions()
                 }
@@ -76,4 +78,5 @@ struct MainTabView: View {
         .environmentObject(WorkoutService.shared)
         .environmentObject(AchievementService.shared)
         .environmentObject(StreakService.shared)
+        .environmentObject(WorkoutStorageService.shared)
 }

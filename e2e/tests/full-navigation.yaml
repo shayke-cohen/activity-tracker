@@ -1,0 +1,83 @@
+# Full Navigation Flow E2E Test - Maestro Compatible Format
+# Tests complete app navigation across all tabs
+# Run with: maestro test full-navigation.yaml
+
+appId: com.activitytracker.ActivityTracker
+
+---
+- launchApp
+
+- assertVisible: "Activity Tracker"
+
+# === Tab 1: Home ===
+- assertVisible: "TODAY'S PROGRESS"
+- assertVisible: "QUICK START"
+- assertVisible: "RECENT ACTIVITY"
+
+- takeScreenshot: "nav-1-home"
+
+# === Tab 2: Awards ===
+- tapOn:
+    id: "trophy.fill"
+
+- assertVisible: "Achievements"
+- assertVisible: "CURRENT STREAK"
+- assertVisible: "BADGES"
+- assertVisible: "MILESTONES"
+
+- takeScreenshot: "nav-2-awards"
+
+# === Tab 3: History ===
+- tapOn:
+    id: "clock.fill"
+
+- assertVisible: "History"
+- assertVisible: "All"
+
+- takeScreenshot: "nav-3-history"
+
+# === Tab 4: Profile/Settings ===
+- tapOn:
+    id: "person.fill"
+
+- assertVisible: "Settings"
+- assertVisible: "Goals"
+- assertVisible: "Health"
+
+- scroll
+
+- assertVisible: "Apple Watch"
+- assertVisible: "Notifications"
+
+- takeScreenshot: "nav-4-settings"
+
+# === Back to Home ===
+- tapOn:
+    id: "house.fill"
+
+- assertVisible: "Activity Tracker"
+
+# === Quick navigation cycle ===
+# Home -> Awards -> History -> Settings -> Home
+
+- tapOn:
+    id: "trophy.fill"
+
+- assertVisible: "Achievements"
+
+- tapOn:
+    id: "clock.fill"
+
+- assertVisible: "History"
+
+- tapOn:
+    id: "person.fill"
+
+- assertVisible: "Settings"
+
+- tapOn:
+    id: "house.fill"
+
+- assertVisible: "Activity Tracker"
+
+- takeScreenshot: "full-navigation-complete"

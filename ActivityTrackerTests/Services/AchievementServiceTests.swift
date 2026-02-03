@@ -8,9 +8,14 @@ final class AchievementServiceTests: XCTestCase {
     override func setUp() {
         super.setUp()
         sut = AchievementService.shared
+        // Reset state before each test to ensure isolation
+        sut.resetForTesting()
     }
     
+    @MainActor
     override func tearDown() {
+        // Clean up after tests
+        sut.resetForTesting()
         sut = nil
         super.tearDown()
     }

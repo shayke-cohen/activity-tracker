@@ -1,0 +1,68 @@
+# Streak and Badges E2E Test
+# Run with: maestro test streak-and-badges.yaml
+
+appId: com.activitytracker.ActivityTracker
+
+---
+- launchApp
+
+- assertVisible: "Activity Tracker"
+
+# Navigate to Awards
+- tapOn:
+    id: "trophy.fill"
+
+- assertVisible: "Achievements"
+
+# Verify streak section
+- assertVisible: "CURRENT STREAK"
+
+- takeScreenshot: "streak-section"
+
+# Verify badges section
+- assertVisible: "BADGES"
+- assertVisible: "View All"
+
+# Verify categories
+- assertVisible: "MILESTONES"
+
+- scroll
+
+- assertVisible: "STREAKS"
+- assertVisible: "PERSONAL BESTS"
+
+- takeScreenshot: "badge-categories"
+
+# View all badges
+- swipe:
+    direction: DOWN
+    duration: 300
+
+- tapOn: "View All"
+
+- assertVisible: "All Badges"
+
+# Verify filter chips
+- assertVisible: "All"
+- assertVisible: "Milestones"
+
+- takeScreenshot: "all-badges-view"
+
+# Tap a badge to see details
+- tapOn: "First Steps"
+
+- assertVisible: "Badge Details"
+- assertVisible: "Category"
+
+- takeScreenshot: "badge-detail"
+
+# Close
+- tapOn: "Done"
+
+# Return home
+- tapOn:
+    id: "house.fill"
+
+- assertVisible: "Activity Tracker"
+
+- takeScreenshot: "streak-badges-complete"

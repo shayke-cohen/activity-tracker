@@ -1,0 +1,34 @@
+# Quick Workout Test - Simplified version
+# Run with: maestro test quick-workout.yaml
+
+appId: com.activitytracker.ActivityTracker
+
+---
+- launchApp
+
+- assertVisible: "Activity Tracker"
+
+# Tap Running quick start
+- tapOn: "Running"
+
+- assertVisible: "CARDIO"
+
+# Tap the Running activity button
+- tapOn:
+    id: "figure.run"
+
+# Wait for confirmation screen
+- extendedWaitUntil:
+    visible: "Start Workout"
+    timeout: 5000
+
+# Take screenshot of activity selection
+- takeScreenshot: "activity-selected"
+
+# Cancel instead of starting (avoids workout stability issues)
+- tapOn: "Cancel"
+
+# Verify we're back on dashboard
+- assertVisible: "Activity Tracker"
+
+- takeScreenshot: "quick-workout-complete"

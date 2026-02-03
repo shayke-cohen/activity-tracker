@@ -1,0 +1,75 @@
+# Badge Details E2E Test - Maestro Compatible Format
+# Tests viewing badge details and categories
+# Run with: maestro test badge-details.yaml
+
+appId: com.activitytracker.ActivityTracker
+
+---
+- launchApp
+
+# Navigate to Awards tab
+- tapOn:
+    id: "trophy.fill"
+
+- assertVisible: "Achievements"
+
+# Verify badges section
+- assertVisible: "BADGES"
+- assertVisible: "View All"
+
+# Tap View All to see all badges
+- tapOn: "View All"
+
+- assertVisible: "All Badges"
+
+# Verify filter chips
+- assertVisible: "All"
+- assertVisible: "Milestones"
+- assertVisible: "Streaks"
+
+# Filter by Milestones category
+- tapOn: "Milestones"
+
+- takeScreenshot: "milestones-badges"
+
+# Filter by Streaks category
+- tapOn: "Streaks"
+
+- takeScreenshot: "streaks-badges"
+
+# Filter by Personal Bests
+- tapOn: "Personal Bests"
+
+- takeScreenshot: "personal-bests-badges"
+
+# Reset to All
+- tapOn: "All"
+
+# Tap on first badge to see details
+- tapOn: "First Steps"
+
+- assertVisible: "Badge Details"
+
+# Verify badge detail content
+- assertVisible: "Category"
+
+# Check unlock status - either UNLOCKED or LOCKED
+- runFlow:
+    when:
+      visible: "UNLOCKED"
+    commands:
+      - assertVisible: "Share Badge"
+
+# Tap Done to dismiss
+- tapOn: "Done"
+
+# Back on All Badges view
+- assertVisible: "All Badges"
+
+- takeScreenshot: "badge-details-complete"
+
+# Return to home
+- tapOn:
+    id: "house.fill"
+
+- assertVisible: "Activity Tracker"

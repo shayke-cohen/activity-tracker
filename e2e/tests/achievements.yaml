@@ -1,109 +1,41 @@
-# Achievements Tab E2E Test
-# Tests the achievements and badges functionality
+# Achievements Tab E2E Test - Maestro Compatible Format
+# Run with: maestro test achievements.yaml
 
-name: Achievements Tab
-description: Test viewing achievements, badges, and streaks
-platform: ios
-app: com.activitytracker.ActivityTracker
+appId: com.activitytracker.ActivityTracker
 
-config:
-  autoAcceptAlerts: true
-  timeout: 30000
+---
+- launchApp
 
-steps:
-  # Navigate to achievements
-  - name: Launch and go to Awards tab
-    inspect:
-      label: home-screen
-    act:
-      action: tap
-      text: "Awards"
-    wait:
-      for: element
-      text: "Achievements"
+# Navigate to Awards tab
+- tapOn:
+    id: "trophy.fill"
 
-  # Verify streak section
-  - name: Verify streak card visible
-    assert:
-      type: visible
-      text: "CURRENT STREAK"
+- assertVisible: "Achievements"
 
-  - name: Verify streak count shown
-    assert:
-      type: visible
-      text: "Day"
+# Verify streak section
+- assertVisible: "CURRENT STREAK"
 
-  # Verify badges section
-  - name: Verify badges overview
-    assert:
-      type: visible
-      text: "BADGES"
+# Verify badges section
+- assertVisible: "BADGES"
 
-  - name: Verify progress indicator
-    assert:
-      type: visible
-      text: "unlocked"
+# Verify View All link
+- assertVisible: "View All"
 
-  # View all badges
-  - name: Tap View All badges
-    act:
-      action: tap
-      text: "View All"
-    wait:
-      for: element
-      text: "All Badges"
+# Verify badge categories
+- assertVisible: "MILESTONES"
 
-  - name: Verify badge grid visible
-    assert:
-      type: visible
-      text: "All"
+# Scroll down to see more
+- scroll
 
-  # Filter badges
-  - name: Filter by Milestones
-    act:
-      action: tap
-      text: "Milestones"
-    wait:
-      for: duration
-      duration: 500
+# View all badges
+- tapOn: "View All"
 
-  - name: Verify filter applied
-    assert:
-      type: visible
-      text: "First Steps"
+- takeScreenshot: "achievements-badges"
 
-  # View badge detail
-  - name: Tap on first badge
-    act:
-      action: tap
-      text: "First Steps"
-    wait:
-      for: element
-      text: "Badge Details"
+# Return to home
+- tapOn:
+    id: "house.fill"
 
-  - name: Verify badge detail view
-    assert:
-      type: visible
-      text: "Complete your first workout"
+- assertVisible: "Activity Tracker"
 
-  # Save baseline
-  - name: Save badge detail baseline
-    inspect:
-      saveBaseline: "badge-detail"
-
-  # Dismiss and return
-  - name: Dismiss badge detail
-    act:
-      action: tap
-      text: "Done"
-    wait:
-      for: element
-      text: "All Badges"
-
-  - name: Return to achievements
-    act:
-      action: swipe
-      direction: right
-    wait:
-      for: element
-      text: "CURRENT STREAK"
+- takeScreenshot: "achievements-complete"

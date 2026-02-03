@@ -4,9 +4,14 @@ struct DashboardView: View {
     @EnvironmentObject var pedometerService: PedometerService
     @EnvironmentObject var healthKitService: HealthKitService
     @EnvironmentObject var streakService: StreakService
+    @EnvironmentObject var workoutStorageService: WorkoutStorageService
     
     @State private var todayCalories: Double = 0
+    @State private var todayDistance: Double = 0
+    @State private var todayExerciseMinutes: Double = 0
+    @State private var recentActivities: [Activity] = []
     @State private var showingWorkoutPicker = false
+    @State private var isLoading = true
     
     var body: some View {
         NavigationStack {
@@ -56,14 +61,14 @@ struct DashboardView: View {
                     .fontWeight(.semibold)
                     .foregroundStyle(.secondary)
                 
-                // Progress Rings
+                // Progress Rings - calories goal 500, exercise goal 30 min
                 ProgressRingsView(
                     moveProgress: min(todayCalories / 500, 2.0),
-                    exerciseProgress: 0.7 // Would be calculated from workouts
+                    exerciseProgress: min(todayExerciseMinutes / 30, 2.0)
                 )
                 .frame(height: 180)
                 
-                // Stats Row
+                // Stats Row - use real data from pedometer and HealthKit
                 HStack(spacing: 30) {
                     StatItem(
                         value: "\(pedometerService.todaySteps.formatted())",
@@ -79,8 +84,9 @@ struct DashboardView: View {
                         color: .orange
                     )
                     
+                    // Use real distance from pedometer or HealthKit
                     StatItem(
-                        value: String(format: "%.1f", pedometerService.todayDistance / 1000),
+                        value: String(format: "%.1f", max(pedometerService.todayDistance, todayDistance) / 1000),
                         label: "km",
                         icon: "location.fill",
                         color: .blue
@@ -177,9 +183,31 @@ struct DashboardView: View {
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
             
-            // Sample activities
-            ForEach([Activity.sampleRun, Activity.sampleCycle], id: \.id) { activity in
-                RecentActivityCard(activity: activity)
+            if isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+                    .padding()
+            } else if recentActivities.isEmpty {
+                // Empty state
+                GlassCard(padding: 20) {
+                    VStack(spacing: 8) {
+                        Image(systemName: "figure.run")
+                            .font(.title)
+                            .foregroundStyle(.secondary)
+                        Text("No recent workouts")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Text("Start a workout to see it here")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            } else {
+                // Real activities from HealthKit
+                ForEach(recentActivities.prefix(5), id: \.id) { activity in
+                    RecentActivityCard(activity: activity)
+                }
             }
         }
     }
@@ -187,11 +215,56 @@ struct DashboardView: View {
     // MARK: - Load Data
     
     private func loadTodayData() async {
+        isLoading = true
+        
+        // Load from HealthKit in parallel
+        async let caloriesTask = healthKitService.queryTodayCalories()
+        async let distanceTask = healthKitService.queryTodayDistance()
+        async let exerciseTask = healthKitService.queryTodayExerciseMinutes()
+        async let workoutsTask = healthKitService.queryRecentWorkouts(limit: 5)
+        
         do {
-            todayCalories = try await healthKitService.queryTodayCalories()
+            todayCalories = try await caloriesTask
         } catch {
-            print("Failed to load calories: \(error)")
+            print("Failed to load calories from HealthKit: \(error)")
+            // Fallback to local storage
+            todayCalories = workoutStorageService.todayStats.calories
         }
+        
+        do {
+            todayDistance = try await distanceTask
+        } catch {
+            print("Failed to load distance from HealthKit: \(error)")
+            // Fallback to local storage
+            todayDistance = workoutStorageService.todayStats.distance
+        }
+        
+        do {
+            todayExerciseMinutes = try await exerciseTask
+        } catch {
+            print("Failed to load exercise minutes from HealthKit: \(error)")
+            // Fallback to local storage
+            todayExerciseMinutes = workoutStorageService.todayStats.duration / 60
+        }
+        
+        do {
+            let hkWorkouts = try await workoutsTask
+            if hkWorkouts.isEmpty {
+                // Use local storage if HealthKit has no data
+                recentActivities = workoutStorageService.getRecentWorkouts(limit: 5)
+            } else {
+                recentActivities = hkWorkouts
+            }
+        } catch {
+            print("Failed to load recent workouts from HealthKit: \(error)")
+            // Fallback to local storage
+            recentActivities = workoutStorageService.getRecentWorkouts(limit: 5)
+        }
+        
+        // Start pedometer updates for real-time step counting
+        pedometerService.startUpdates()
+        
+        isLoading = false
     }
 }
 
@@ -289,4 +362,5 @@ struct RecentActivityCard: View {
         .environmentObject(PedometerService.shared)
         .environmentObject(HealthKitService.shared)
         .environmentObject(StreakService.shared)
+        .environmentObject(WorkoutStorageService.shared)
 }

@@ -1,0 +1,55 @@
+# Dashboard Full Coverage E2E Test
+# Run with: maestro test dashboard-full.yaml
+
+appId: com.activitytracker.ActivityTracker
+
+---
+- launchApp
+
+- assertVisible: "Activity Tracker"
+
+# Verify all main sections
+- assertVisible: "TODAY'S PROGRESS"
+- assertVisible: "Move"
+- assertVisible: "Steps"
+- assertVisible: "Calories"
+- assertVisible: "km"
+
+# Verify quick start section
+- assertVisible: "QUICK START"
+- assertVisible: "Running"
+- assertVisible: "Cycling"
+- assertVisible: "Swimming"
+- assertVisible: "Yoga"
+- assertVisible: "More"
+
+# Verify recent activity
+- assertVisible: "RECENT ACTIVITY"
+
+- takeScreenshot: "dashboard-main"
+
+# Scroll to see more content
+- scroll
+
+- takeScreenshot: "dashboard-scrolled"
+
+# Scroll back
+- swipe:
+    direction: DOWN
+    duration: 500
+
+# Test settings button
+- tapOn:
+    id: "gearshape.fill"
+
+- assertVisible: "Settings"
+
+- takeScreenshot: "settings-from-dashboard"
+
+# Go back to home
+- tapOn:
+    id: "house.fill"
+
+- assertVisible: "Activity Tracker"
+
+- takeScreenshot: "dashboard-full-complete"

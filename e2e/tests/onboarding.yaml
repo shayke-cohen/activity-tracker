@@ -1,108 +1,48 @@
-# Onboarding E2E Test
-# Tests initial app launch and permission requests
+# Onboarding E2E Test - Maestro Compatible Format
+# Run with: maestro test onboarding.yaml
 
-name: App Onboarding
-description: Test first launch experience and permission handling
-platform: ios
-app: com.activitytracker.ActivityTracker
+appId: com.activitytracker.ActivityTracker
 
-config:
-  autoAcceptAlerts: true  # Auto-accept HealthKit permissions
-  timeout: 30000
+---
+# Launch app
+- launchApp
 
-steps:
-  # Fresh app launch
-  - name: Launch app fresh
-    inspect:
-      label: fresh-launch
+# Wait for either HealthKit dialog or dashboard to appear
+- runFlow:
+    when:
+      visible: "Turn On All"
+    commands:
+      - tapOn: "Turn On All"
+      - tapOn: "Allow"
 
-  # Handle HealthKit permission (auto-accepted via config)
-  - name: Wait for permission handling
-    wait:
-      for: duration
-      duration: 2000
+# Verify dashboard loaded
+- assertVisible: "Activity Tracker"
 
-  # Verify main dashboard loads
-  - name: Verify dashboard displayed
-    assert:
-      type: visible
-      text: "Activity Tracker"
+- assertVisible: "TODAY'S PROGRESS"
 
-  - name: Verify Today's Progress section
-    assert:
-      type: visible
-      text: "TODAY'S PROGRESS"
+- assertVisible: "Steps"
 
-  # Verify all tabs are accessible
-  - name: Check Home tab
-    assert:
-      type: visible
-      text: "Home"
+- assertVisible: "QUICK START"
 
-  - name: Check Awards tab exists
-    assert:
-      type: visible
-      text: "Awards"
+# Navigate tabs using accessibility IDs
+- tapOn:
+    id: "trophy.fill"
 
-  - name: Check History tab exists
-    assert:
-      type: visible
-      text: "History"
+- assertVisible: "Achievements"
 
-  - name: Check Profile tab exists
-    assert:
-      type: visible
-      text: "Profile"
+- tapOn:
+    id: "clock.fill"
 
-  # Verify core functionality
-  - name: Verify step tracking active
-    assert:
-      type: visible
-      text: "Steps"
+- assertVisible: "History"
 
-  - name: Verify quick start section
-    assert:
-      type: visible
-      text: "QUICK START"
+- tapOn:
+    id: "person.fill"
 
-  # Take baseline screenshot
-  - name: Save onboarding complete baseline
-    inspect:
-      saveBaseline: "onboarding-complete"
+- assertVisible: "Settings"
 
-  # Navigate through all tabs
-  - name: Navigate to Awards
-    act:
-      action: tap
-      text: "Awards"
-    wait:
-      for: element
-      text: "Achievements"
+- tapOn:
+    id: "house.fill"
 
-  - name: Navigate to History
-    act:
-      action: tap
-      text: "History"
-    wait:
-      for: element
-      text: "History"
+- assertVisible: "Activity Tracker"
 
-  - name: Navigate to Profile
-    act:
-      action: tap
-      text: "Profile"
-    wait:
-      for: element
-      text: "Settings"
-
-  - name: Return to Home
-    act:
-      action: tap
-      text: "Home"
-    wait:
-      for: element
-      text: "Activity Tracker"
-
-  - name: Onboarding flow complete
-    inspect:
-      label: onboarding-complete
+- takeScreenshot: "onboarding-complete"

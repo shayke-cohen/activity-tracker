@@ -1,0 +1,24 @@
+{
+  "name": "Activity Tracker E2E Tests",
+  "platform": "ios",
+  "app": "com.activitytracker.ActivityTracker",
+  "deviceName": "iPhone 17 Pro",
+  "platformVersion": "26.2",
+  "autoAcceptAlerts": true,
+  "timeout": 30000,
+  "retries": 2,
+  "screenshots": {
+    "enabled": true,
+    "outputDir": "../tests/screenshots"
+  },
+  "video": {
+    "enabled": true,
+    "outputDir": "../tests/videos"
+  },
+  "tests": [
+    "tests/onboarding.yaml",
+    "tests/workout-flow.yaml",
+    "tests/achievements.yaml",
+    "tests/settings.yaml"
+  ]
+}

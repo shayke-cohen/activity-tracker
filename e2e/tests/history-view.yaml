@@ -1,0 +1,65 @@
+# History View E2E Test - Maestro Compatible Format
+# Run with: maestro test history-view.yaml
+
+appId: com.activitytracker.ActivityTracker
+
+---
+- launchApp
+
+# Navigate to History tab
+- tapOn:
+    id: "clock.fill"
+
+- assertVisible: "History"
+
+# Verify filter bar exists
+- assertVisible: "All"
+
+# Test filter chips - tap Running filter
+- tapOn: "Running"
+
+# Tap All to reset filter
+- tapOn: "All"
+
+# Test Cycling filter
+- tapOn: "Cycling"
+
+# Tap All again
+- tapOn: "All"
+
+# Test date range menu - tap calendar icon
+- tapOn:
+    id: "calendar"
+
+# Select "This Week" from menu
+- tapOn: "This Week"
+
+# Open menu again
+- tapOn:
+    id: "calendar"
+
+# Select "This Month"
+- tapOn: "This Month"
+
+# Open menu again
+- tapOn:
+    id: "calendar"
+
+# Select "All Time"
+- tapOn: "All Time"
+
+# Scroll down to see more workouts (if any)
+- scroll
+
+# Scroll back up
+- swipe:
+    direction: DOWN
+    duration: 300
+
+- takeScreenshot: "history-view-complete"
+
+# Return to home
+- tapOn:
+    id: "house.fill"
+
+- assertVisible: "Activity Tracker"
