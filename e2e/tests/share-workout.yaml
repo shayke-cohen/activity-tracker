@@ -1,0 +1,70 @@
+# Share Workout E2E Test
+# Tests the social sharing functionality for workouts
+# Run with: maestro test share-workout.yaml
+
+appId: com.activitytracker.ActivityTracker
+
+---
+- launchApp
+
+- assertVisible: "Activity Tracker"
+
+# Navigate to History
+- tapOn:
+    id: "clock.fill"
+
+- assertVisible: "History"
+
+# Wait for workouts to load
+- extendedWaitUntil:
+    visible: "All"
+    timeout: 5000
+
+- takeScreenshot: "history-for-share"
+
+# Check for Today section which indicates workouts exist
+- runFlow:
+    when:
+      visible: "Today"
+    commands:
+      # Tap on first workout card
+      - tapOn: "Today"
+      
+      # Wait for detail view
+      - extendedWaitUntil:
+          visible: "Share Workout"
+          timeout: 5000
+      
+      # Take screenshot
+      - takeScreenshot: "workout-detail-for-share"
+      
+      # Tap Share Workout button
+      - tapOn: "Share Workout"
+      
+      # Verify share view
+      - assertVisible: "Share Workout"
+      - assertVisible: "PREVIEW"
+      - assertVisible: "FORMAT"
+      - assertVisible: "SHARE TO"
+      
+      # Verify share destinations
+      - assertVisible: "Instagram"
+      - assertVisible: "Messages"
+      - assertVisible: "Save"
+      - assertVisible: "Copy"
+      
+      - takeScreenshot: "share-view"
+      
+      # Test Copy function
+      - tapOn: "Copy"
+      
+      # Dismiss
+      - tapOn: "Done"
+
+# Return to home
+- tapOn:
+    id: "house.fill"
+
+- assertVisible: "Activity Tracker"
+
+- takeScreenshot: "share-complete"
