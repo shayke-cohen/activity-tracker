@@ -32,7 +32,7 @@ struct DashboardView: View {
                 .padding()
             }
             .background(Color.safeBackground)
-            .navigationTitle("Activity Tracker")
+            .navigationTitle("Workout Tracker")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink {

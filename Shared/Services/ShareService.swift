@@ -43,7 +43,7 @@ class ShareService: ObservableObject {
         }
         
         lines.append("")
-        lines.append("Tracked with Activity Tracker")
+        lines.append("Tracked with Workout Tracker")
         
         return lines.joined(separator: "\n")
     }
@@ -177,7 +177,7 @@ struct ShareCardContent: View {
                 .opacity(0.8)
                 
                 // App branding
-                Text("Activity Tracker")
+                Text("Workout Tracker")
                     .font(.caption)
                     .opacity(0.6)
             }

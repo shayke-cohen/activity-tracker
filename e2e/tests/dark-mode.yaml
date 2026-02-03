@@ -8,7 +8,7 @@ appId: com.activitytracker.ActivityTracker
 - launchApp
 
 # Verify dashboard loads in dark mode
-- assertVisible: "Activity Tracker"
+- assertVisible: "Workout Tracker"
 
 - takeScreenshot: "dark-mode-dashboard"
 
@@ -54,6 +54,6 @@ appId: com.activitytracker.ActivityTracker
 - tapOn: "Cancel"
 
 # Return to home
-- assertVisible: "Activity Tracker"
+- assertVisible: "Workout Tracker"
 
 - takeScreenshot: "dark-mode-complete"

@@ -6,7 +6,7 @@ appId: com.activitytracker.ActivityTracker
 ---
 - launchApp
 
-- assertVisible: "Activity Tracker"
+- assertVisible: "Workout Tracker"
 
 # Open More activities
 - tapOn: "More"
@@ -44,6 +44,6 @@ appId: com.activitytracker.ActivityTracker
 # Cancel
 - tapOn: "Cancel"
 
-- assertVisible: "Activity Tracker"
+- assertVisible: "Workout Tracker"
 
 - takeScreenshot: "activity-selection-complete"

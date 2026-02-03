@@ -62,4 +62,4 @@ appId: com.activitytracker.ActivityTracker
 - tapOn:
     id: "house.fill"
 
-- assertVisible: "Activity Tracker"
+- assertVisible: "Workout Tracker"

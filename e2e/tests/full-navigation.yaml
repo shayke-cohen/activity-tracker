@@ -7,7 +7,7 @@ appId: com.activitytracker.ActivityTracker
 ---
 - launchApp
 
-- assertVisible: "Activity Tracker"
+- assertVisible: "Workout Tracker"
 
 # === Tab 1: Home ===
 - assertVisible: "TODAY'S PROGRESS"
@@ -55,7 +55,7 @@ appId: com.activitytracker.ActivityTracker
 - tapOn:
     id: "house.fill"
 
-- assertVisible: "Activity Tracker"
+- assertVisible: "Workout Tracker"
 
 # === Quick navigation cycle ===
 # Home -> Awards -> History -> Settings -> Home
@@ -78,6 +78,6 @@ appId: com.activitytracker.ActivityTracker
 - tapOn:
     id: "house.fill"
 
-- assertVisible: "Activity Tracker"
+- assertVisible: "Workout Tracker"
 
 - takeScreenshot: "full-navigation-complete"

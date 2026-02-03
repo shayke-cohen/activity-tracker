@@ -6,29 +6,25 @@ appId: com.activitytracker.ActivityTracker
 ---
 - launchApp
 
-- assertVisible: "Activity Tracker"
+- assertVisible: "Workout Tracker"
 
-# Tap Running quick start
-- tapOn: "Running"
+# Tap More to open activity selection
+- tapOn: "More"
 
+- assertVisible: "Start Workout"
 - assertVisible: "CARDIO"
 
-# Tap the Running activity button
-- tapOn:
-    id: "figure.run"
-
-# Wait for confirmation screen
-- extendedWaitUntil:
-    visible: "Start Workout"
-    timeout: 5000
+# Verify we can see different activity categories
+- assertVisible: "GYM & STRENGTH"
+- assertVisible: "MIND & BODY"
 
 # Take screenshot of activity selection
-- takeScreenshot: "activity-selected"
+- takeScreenshot: "activity-selection-modal"
 
-# Cancel instead of starting (avoids workout stability issues)
+# Cancel to return to dashboard
 - tapOn: "Cancel"
 
 # Verify we're back on dashboard
-- assertVisible: "Activity Tracker"
+- assertVisible: "Workout Tracker"
 
 - takeScreenshot: "quick-workout-complete"

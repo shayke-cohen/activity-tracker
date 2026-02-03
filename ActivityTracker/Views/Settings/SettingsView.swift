@@ -342,7 +342,7 @@ struct PrivacyPolicyView: View {
             Text("""
             Privacy Policy
             
-            Your privacy is important to us. Activity Tracker stores all your health and fitness data locally on your device and in Apple HealthKit.
+            Your privacy is important to us. Workout Tracker stores all your health and fitness data locally on your device and in Apple HealthKit.
             
             Data We Collect:
             - Workout data (duration, distance, calories)
