@@ -1,2 +1,19 @@
 # AI-Native Engineer template (cloned subfolder)
 ai-native-engineer/
+
+# Xcode
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+
+# Generated screenshots from E2E tests
+*.png
+
+# Maestro test output
+tests/
+
+# macOS
+.DS_Store
