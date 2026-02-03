@@ -1,0 +1,143 @@
+# History Tab Regression Tests
+# Comprehensive tests for history view and logging functionality
+# Run with: maestro test history-regression.yaml
+
+appId: com.activitytracker.ActivityTracker
+
+---
+- launchApp
+
+- assertVisible: "Workout Tracker"
+
+# =====================
+# TEST 1: Navigate to History
+# =====================
+- tapOn:
+    id: "clock.fill"
+
+- assertVisible: "History"
+
+# Wait for loading to complete
+- extendedWaitUntil:
+    visible: "All"
+    timeout: 5000
+
+- takeScreenshot: "history-initial"
+
+# =====================
+# TEST 2: Verify Filter Bar UI (visible filters)
+# =====================
+- assertVisible: "All"
+- assertVisible: "Running"
+- assertVisible: "Cycling"
+- assertVisible: "Swimming"
+
+# =====================
+# TEST 3: Test Filter Selection
+# =====================
+# Select Running filter
+- tapOn: "Running"
+
+# Wait a moment for filter to apply
+- extendedWaitUntil:
+    visible: "Running"
+    timeout: 3000
+
+- takeScreenshot: "history-filter-running"
+
+# Select Cycling filter
+- tapOn: "Cycling"
+
+- takeScreenshot: "history-filter-cycling"
+
+# Select Swimming filter
+- tapOn: "Swimming"
+
+- takeScreenshot: "history-filter-swimming"
+
+# Return to All
+- tapOn: "All"
+
+- takeScreenshot: "history-filter-all"
+
+# =====================
+# TEST 4: Test Date Range Menu
+# =====================
+- tapOn:
+    id: "calendar"
+
+- assertVisible: "This Week"
+- assertVisible: "This Month"
+- assertVisible: "All Time"
+
+- takeScreenshot: "history-date-menu"
+
+# Select This Week
+- tapOn: "This Week"
+
+# Wait for data to load
+- extendedWaitUntil:
+    visible: "All"
+    timeout: 5000
+
+# Open menu again
+- tapOn:
+    id: "calendar"
+
+# Select This Month
+- tapOn: "This Month"
+
+- extendedWaitUntil:
+    visible: "All"
+    timeout: 5000
+
+# Open menu again
+- tapOn:
+    id: "calendar"
+
+# Select All Time
+- tapOn: "All Time"
+
+- extendedWaitUntil:
+    visible: "All"
+    timeout: 5000
+
+- takeScreenshot: "history-all-time"
+
+# =====================
+# TEST 5: Check Empty State OR Workouts
+# =====================
+# Check for empty state message
+- runFlow:
+    when:
+      visible: "No workouts yet"
+    commands:
+      - assertVisible: "Start a workout to see your history here"
+      - takeScreenshot: "history-empty-state"
+
+# OR check for workout cards (Today section)
+- runFlow:
+    when:
+      visible: "Today"
+    commands:
+      - scroll
+      - takeScreenshot: "history-with-workouts"
+      # Try tapping on a workout to see details
+      - tapOn: "Today"
+      - extendedWaitUntil:
+          visible: "Workout Details"
+          timeout: 5000
+      - assertVisible: "Duration"
+      - takeScreenshot: "history-workout-details"
+      - tapOn:
+          id: "clock.fill"
+
+# =====================
+# TEST 6: Return to Home
+# =====================
+- tapOn:
+    id: "house.fill"
+
+- assertVisible: "Workout Tracker"
+
+- takeScreenshot: "history-regression-complete"

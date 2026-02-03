@@ -1,0 +1,135 @@
+# Workout Selection & History Verification Test
+# Tests the workout selection flow and verifies history functionality
+# Note: Full workout logging requires HealthKit authorization (not available in automation)
+# Run with: maestro test workout-logging.yaml
+
+appId: com.activitytracker.ActivityTracker
+
+---
+- launchApp
+
+- assertVisible: "Workout Tracker"
+
+# =====================
+# TEST 1: Verify History Tab Works
+# =====================
+- tapOn:
+    id: "clock.fill"
+
+- assertVisible: "History"
+
+# Verify filter bar
+- assertVisible: "All"
+- assertVisible: "Running"
+
+# Verify date picker accessible
+- tapOn:
+    id: "calendar"
+
+- assertVisible: "This Week"
+- assertVisible: "This Month"
+- assertVisible: "All Time"
+
+- tapOn: "This Month"
+
+- takeScreenshot: "history-verified"
+
+# =====================
+# TEST 2: Verify Workout Selection Works
+# =====================
+- tapOn:
+    id: "house.fill"
+
+- assertVisible: "Workout Tracker"
+
+# Open activity selection
+- tapOn: "More"
+
+- assertVisible: "Start Workout"
+- assertVisible: "CARDIO"
+- assertVisible: "Running"
+- assertVisible: "Cycling"
+
+# Scroll to see more activities
+- scroll
+
+- assertVisible: "GYM & STRENGTH"
+- assertVisible: "MIND & BODY"
+- assertVisible: "Yoga"
+
+- takeScreenshot: "activity-list-full"
+
+# =====================
+# TEST 3: Test Activity Selection Navigation
+# =====================
+# Tap Yoga to navigate to countdown view
+- tapOn:
+    id: "figure.yoga"
+
+# Should see countdown view
+- extendedWaitUntil:
+    visible: "Yoga"
+    timeout: 5000
+
+# Verify countdown view has Cancel button
+- assertVisible: "Cancel"
+
+- takeScreenshot: "workout-countdown-view"
+
+# Cancel and return
+- tapOn: "Cancel"
+
+# Should be back on activity selection
+- assertVisible: "Start Workout"
+
+- tapOn: "Cancel"
+
+# =====================
+# TEST 4: Return to Dashboard
+# =====================
+- assertVisible: "Workout Tracker"
+
+- takeScreenshot: "logging-test-complete"
+
+# =====================
+# TEST 5: Verify History Empty State OR Workouts
+# =====================
+- tapOn:
+    id: "clock.fill"
+
+- assertVisible: "History"
+
+# Check for empty state or workouts
+- runFlow:
+    when:
+      visible: "No workouts yet"
+    commands:
+      - assertVisible: "Start a workout to see your history here"
+      - takeScreenshot: "history-empty-verified"
+
+- runFlow:
+    when:
+      visible: "Today"
+    commands:
+      - takeScreenshot: "history-has-workouts"
+      # Tap to see workout details
+      - tapOn: "Today"
+      - extendedWaitUntil:
+          visible: "Workout Details"
+          timeout: 5000
+      - assertVisible: "Duration"
+      - assertVisible: "Calories"
+      - takeScreenshot: "workout-details"
+      # Go back
+      - tapOn:
+          id: "clock.fill"
+
+# =====================
+# FINAL: Return Home
+# =====================
+- tapOn:
+    id: "house.fill"
+
+- assertVisible: "Workout Tracker"
+
+- takeScreenshot: "logging-regression-complete"
