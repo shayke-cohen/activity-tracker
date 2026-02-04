@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// View displayed during an active workout
 struct WorkoutInProgressView: View {
@@ -11,7 +12,22 @@ struct WorkoutInProgressView: View {
     @State private var showingSummary = false
     @State private var completedActivity: Activity?
     
+    // Timer to force UI updates every second
+    @State private var timerCancellable: AnyCancellable?
+    @State private var displayTime: String = "00:00"
+    @State private var displayCalories: Int = 0
+    @State private var displayHeartRate: Int = 0
+    @State private var displayDistance: Double = 0
+    @State private var displayPace: String = "--:--"
+    @State private var isPaused: Bool = false
+    
+    init(activityType: ActivityType) {
+        self.activityType = activityType
+        print("DEBUG: [WorkoutInProgressView] init called for \(activityType.displayName)")
+    }
+    
     var body: some View {
+        let _ = print("DEBUG: [WorkoutInProgressView] body evaluated")
         ZStack {
             // Background gradient
             LinearGradient.activityGradient(for: activityType)
@@ -30,7 +46,7 @@ struct WorkoutInProgressView: View {
                     Spacer()
                     
                     // Status indicator
-                    if workoutService.currentWorkout?.state == .paused {
+                    if isPaused {
                         Text("PAUSED")
                             .font(.caption)
                             .fontWeight(.bold)
@@ -46,8 +62,8 @@ struct WorkoutInProgressView: View {
                 
                 Spacer()
                 
-                // Main timer
-                Text(workoutService.currentWorkout?.formattedElapsedTime ?? "00:00")
+                // Main timer - using local state that updates every second
+                Text(displayTime)
                     .font(.system(size: 72, weight: .bold, design: .rounded))
                     .monospacedDigit()
                 
@@ -70,11 +86,53 @@ struct WorkoutInProgressView: View {
             }
             Button("Cancel", role: .cancel) {}
         }
-        .fullScreenCover(isPresented: $showingSummary) {
+        .fullScreenCover(isPresented: $showingSummary, onDismiss: {
+            // When summary is dismissed, dismiss this view too
+            dismiss()
+        }) {
             if let activity = completedActivity {
                 WorkoutSummaryView(activity: activity)
+                    .environmentObject(AchievementService.shared)
+                    .environmentObject(StreakService.shared)
+                    .environmentObject(HealthKitService.shared)
             }
         }
+        .onAppear {
+            startDisplayTimer()
+        }
+        .onDisappear {
+            stopDisplayTimer()
+        }
+    }
+    
+    // MARK: - Display Timer
+    
+    private func startDisplayTimer() {
+        // Update display immediately
+        updateDisplay()
+        
+        // Start timer to update display every second
+        timerCancellable = Timer.publish(every: 1.0, on: .main, in: .common)
+            .autoconnect()
+            .sink { _ in
+                updateDisplay()
+            }
+    }
+    
+    private func stopDisplayTimer() {
+        timerCancellable?.cancel()
+        timerCancellable = nil
+    }
+    
+    private func updateDisplay() {
+        guard let workout = workoutService.currentWorkout else { return }
+        
+        displayTime = workout.formattedElapsedTime
+        displayCalories = Int(workout.calories)
+        displayHeartRate = workout.currentHeartRate
+        displayDistance = workout.distance
+        displayPace = workout.formattedPace
+        isPaused = workout.state == .paused
     }
     
     // MARK: - Metrics Grid
@@ -84,44 +142,51 @@ struct WorkoutInProgressView: View {
             GridItem(.flexible()),
             GridItem(.flexible())
         ], spacing: 20) {
-            if let workout = workoutService.currentWorkout {
-                // Distance (for GPS activities)
-                if activityType.usesGPS {
-                    MetricCard(
-                        value: workout.formattedDistance,
-                        unit: "km",
-                        label: "Distance",
-                        icon: "location.fill"
-                    )
-                    
-                    MetricCard(
-                        value: workout.formattedPace,
-                        unit: "/km",
-                        label: "Pace",
-                        icon: "speedometer"
-                    )
-                }
-                
-                // Heart rate
+            // Distance (for GPS activities)
+            if activityType.usesGPS {
                 MetricCard(
-                    value: workout.currentHeartRate > 0 ? "\(workout.currentHeartRate)" : "--",
-                    unit: "bpm",
-                    label: "Heart Rate",
-                    icon: "heart.fill",
-                    color: .red
+                    value: formatDistance(displayDistance),
+                    unit: "km",
+                    label: "Distance",
+                    icon: "location.fill"
                 )
                 
-                // Calories
                 MetricCard(
-                    value: "\(Int(workout.calories))",
-                    unit: "cal",
-                    label: "Calories",
-                    icon: "flame.fill",
-                    color: .orange
+                    value: displayPace,
+                    unit: "/km",
+                    label: "Pace",
+                    icon: "speedometer"
                 )
             }
+            
+            // Heart rate
+            MetricCard(
+                value: displayHeartRate > 0 ? "\(displayHeartRate)" : "--",
+                unit: "bpm",
+                label: "Heart Rate",
+                icon: "heart.fill",
+                color: .red
+            )
+            
+            // Calories
+            MetricCard(
+                value: "\(displayCalories)",
+                unit: "cal",
+                label: "Calories",
+                icon: "flame.fill",
+                color: .orange
+            )
         }
         .padding(.horizontal)
+    }
+    
+    private func formatDistance(_ distance: Double) -> String {
+        let km = distance / 1000
+        if km >= 1 {
+            return String(format: "%.2f", km)
+        } else {
+            return String(format: "%.0f m", distance)
+        }
     }
     
     // MARK: - Control Buttons
@@ -130,10 +195,12 @@ struct WorkoutInProgressView: View {
         HStack(spacing: 30) {
             // Pause/Resume button
             Button {
-                if workoutService.currentWorkout?.state == .paused {
+                if isPaused {
                     workoutService.resumeWorkout()
+                    isPaused = false
                 } else {
                     workoutService.pauseWorkout()
+                    isPaused = true
                 }
             } label: {
                 ZStack {
@@ -141,7 +208,7 @@ struct WorkoutInProgressView: View {
                         .fill(.ultraThinMaterial)
                         .frame(width: 80, height: 80)
                     
-                    Image(systemName: workoutService.currentWorkout?.state == .paused ? "play.fill" : "pause.fill")
+                    Image(systemName: isPaused ? "play.fill" : "pause.fill")
                         .font(.title)
                         .foregroundStyle(.primary)
                 }
@@ -167,19 +234,25 @@ struct WorkoutInProgressView: View {
     // MARK: - Actions
     
     private func endWorkout() {
+        stopDisplayTimer()
         Task {
             do {
                 if let activity = try await workoutService.endWorkout() {
                     completedActivity = activity
                     showingSummary = true
+                } else {
+                    // No activity returned, just dismiss
+                    dismiss()
                 }
             } catch {
                 print("Failed to end workout: \(error)")
+                dismiss()
             }
         }
     }
     
     private func discardWorkout() {
+        stopDisplayTimer()
         Task {
             await workoutService.discardWorkout()
             dismiss()

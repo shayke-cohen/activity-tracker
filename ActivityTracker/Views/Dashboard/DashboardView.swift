@@ -5,12 +5,16 @@ struct DashboardView: View {
     @EnvironmentObject var healthKitService: HealthKitService
     @EnvironmentObject var streakService: StreakService
     @EnvironmentObject var workoutStorageService: WorkoutStorageService
+    @EnvironmentObject var workoutService: WorkoutService
     
     @State private var todayCalories: Double = 0
     @State private var todayDistance: Double = 0
     @State private var todayExerciseMinutes: Double = 0
     @State private var recentActivities: [Activity] = []
     @State private var showingWorkoutPicker = false
+    @State private var selectedQuickStartActivity: ActivityType?
+    @State private var showWorkoutInProgress = false
+    @State private var activeWorkoutActivityType: ActivityType?  // Stored when workout starts
     @State private var isLoading = true
     
     var body: some View {
@@ -44,6 +48,30 @@ struct DashboardView: View {
             }
             .sheet(isPresented: $showingWorkoutPicker) {
                 ActivityListView()
+            }
+            .navigationDestination(item: $selectedQuickStartActivity) { activity in
+                WorkoutCountdownView(activityType: activity)
+            }
+            .fullScreenCover(isPresented: $showWorkoutInProgress, onDismiss: {
+                // Ensure state is reset when the view is dismissed
+                activeWorkoutActivityType = nil
+            }) {
+                // Use the stored activity type - currentWorkout may become nil when workout ends
+                if let activityType = activeWorkoutActivityType {
+                    WorkoutInProgressView(activityType: activityType)
+                }
+            }
+            .onChange(of: workoutService.isWorkoutActive) { oldValue, newValue in
+                if newValue {
+                    // Store the activity type before showing workout view
+                    activeWorkoutActivityType = workoutService.currentWorkout?.activityType
+                    // Present workout view
+                    showWorkoutInProgress = true
+                    // Clear navigation to prevent issues
+                    selectedQuickStartActivity = nil
+                }
+                // Don't auto-dismiss when workout ends - let WorkoutInProgressView
+                // handle its own dismissal after showing the summary
             }
             .task {
                 await loadTodayData()
@@ -144,11 +172,12 @@ struct DashboardView: View {
                 HStack(spacing: 12) {
                     ForEach([ActivityType.running, .cycling, .swimming, .yoga], id: \.self) { activity in
                         QuickStartButton(activity: activity) {
-                            showingWorkoutPicker = true
+                            // Navigate directly to countdown view for this activity
+                            selectedQuickStartActivity = activity
                         }
                     }
                     
-                    // More button
+                    // More button - opens full activity picker
                     Button {
                         showingWorkoutPicker = true
                     } label: {
@@ -363,4 +392,5 @@ struct RecentActivityCard: View {
         .environmentObject(HealthKitService.shared)
         .environmentObject(StreakService.shared)
         .environmentObject(WorkoutStorageService.shared)
+        .environmentObject(WorkoutService.shared)
 }

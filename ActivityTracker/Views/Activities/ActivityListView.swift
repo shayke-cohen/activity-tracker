@@ -2,8 +2,10 @@ import SwiftUI
 
 /// Activity picker view for starting workouts
 struct ActivityListView: View {
+    @EnvironmentObject var workoutService: WorkoutService
     @Environment(\.dismiss) private var dismiss
     @State private var selectedActivity: ActivityType?
+    @State private var showWorkoutInProgress = false
     
     var body: some View {
         NavigationStack {
@@ -29,6 +31,31 @@ struct ActivityListView: View {
             .navigationDestination(item: $selectedActivity) { activity in
                 WorkoutCountdownView(activityType: activity)
             }
+        }
+        .fullScreenCover(isPresented: $showWorkoutInProgress, onDismiss: {
+            print("DEBUG: [ActivityListView] fullScreenCover dismissed")
+            // Also dismiss this sheet when workout view is dismissed
+            dismiss()
+        }) {
+            if let activityType = workoutService.currentWorkout?.activityType {
+                let _ = print("DEBUG: [ActivityListView] Presenting WorkoutInProgressView for \(activityType.displayName)")
+                WorkoutInProgressView(activityType: activityType)
+            } else {
+                let _ = print("DEBUG: [ActivityListView] No activityType found!")
+                // Dismiss immediately if no workout
+                Color.clear.onAppear { showWorkoutInProgress = false }
+            }
+        }
+        .onChange(of: workoutService.isWorkoutActive) { oldValue, newValue in
+            print("DEBUG: [ActivityListView] isWorkoutActive changed: \(oldValue) -> \(newValue)")
+            if newValue {
+                // Present workout view
+                showWorkoutInProgress = true
+                // Clear navigation
+                selectedActivity = nil
+            }
+            // Don't auto-dismiss when workout ends - let WorkoutInProgressView
+            // handle its own dismissal after showing the summary
         }
     }
     
@@ -93,7 +120,6 @@ struct WorkoutCountdownView: View {
     
     @State private var countdown = 3
     @State private var isCountingDown = false
-    @State private var showWorkoutInProgress = false
     
     var body: some View {
         ZStack {
@@ -137,34 +163,42 @@ struct WorkoutCountdownView: View {
                 }
             }
         }
-        .fullScreenCover(isPresented: $showWorkoutInProgress) {
-            WorkoutInProgressView(activityType: activityType)
-        }
+        // Workout view is now presented from MainTabView when workoutService.isWorkoutActive is true
+        // We don't dismiss here - the fullScreenCover will present over the sheet
     }
     
     private func startCountdown() {
-        isCountingDown = true
-        countdown = 3
+        // Skip countdown for debugging - start immediately
+        print("DEBUG: [WorkoutCountdownView] startCountdown called - starting workout immediately")
+        startWorkout()
         
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
-            if countdown > 1 {
-                withAnimation(.spring(response: 0.3)) {
-                    countdown -= 1
-                }
-            } else {
-                timer.invalidate()
-                startWorkout()
-            }
-        }
+        // Original countdown code (disabled for debugging)
+        // isCountingDown = true
+        // countdown = 3
+        //
+        // Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+        //     if countdown > 1 {
+        //         withAnimation(.spring(response: 0.3)) {
+        //             countdown -= 1
+        //         }
+        //     } else {
+        //         timer.invalidate()
+        //         startWorkout()
+        //     }
+        // }
     }
     
     private func startWorkout() {
-        Task {
+        Task { @MainActor in
             do {
+                print("DEBUG: [WorkoutCountdownView] Starting workout for \(activityType.displayName)")
                 try await workoutService.startWorkout(type: activityType)
-                showWorkoutInProgress = true
+                print("DEBUG: [WorkoutCountdownView] Workout started successfully")
+                print("DEBUG: [WorkoutCountdownView] isWorkoutActive: \(workoutService.isWorkoutActive)")
+                // The onChange handler will dismiss this view when isWorkoutActive becomes true
+                // MainTabView will then present WorkoutInProgressView
             } catch {
-                print("Failed to start workout: \(error)")
+                print("DEBUG: [WorkoutCountdownView] Failed to start workout: \(error)")
                 isCountingDown = false
             }
         }

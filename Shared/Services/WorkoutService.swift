@@ -18,7 +18,21 @@ class WorkoutService: ObservableObject {
     // MARK: - Start Workout
     
     /// Start a new workout session with HKLiveWorkoutBuilder
+    /// Falls back to local-only mode if HealthKit is unavailable
     func startWorkout(type: ActivityType) async throws {
+        print("DEBUG: [WorkoutService] startWorkout called for \(type.displayName)")
+        
+        // Always create our local workout session first
+        currentWorkout = WorkoutSession(activityType: type)
+        print("DEBUG: [WorkoutService] Created WorkoutSession: \(String(describing: currentWorkout))")
+        
+        currentWorkout?.start()
+        print("DEBUG: [WorkoutService] WorkoutSession started")
+        
+        isWorkoutActive = true
+        print("DEBUG: [WorkoutService] isWorkoutActive = true")
+        
+        // Try to set up HealthKit integration
         let configuration = HKWorkoutConfiguration()
         configuration.activityType = type.healthKitType
         configuration.locationType = type.usesGPS ? .outdoor : .indoor
@@ -47,19 +61,23 @@ class WorkoutService: ObservableObject {
             workoutSession?.startActivity(with: startDate)
             try await workoutBuilder?.beginCollection(at: startDate)
             
-            // Create our workout session model
-            currentWorkout = WorkoutSession(activityType: type)
-            currentWorkout?.start()
-            isWorkoutActive = true
-            
-            // Start Live Activity
-            if let workout = currentWorkout {
-                await LiveActivityManager.shared.startActivity(for: workout)
-            }
-            
         } catch {
-            throw WorkoutError.failedToStart(error)
+            // HealthKit failed - continue in local-only mode
+            print("DEBUG: [WorkoutService] HealthKit unavailable, running in local-only mode: \(error)")
+            workoutSession = nil
+            workoutBuilder = nil
         }
+        
+        print("DEBUG: [WorkoutService] HealthKit setup complete (session: \(workoutSession != nil), builder: \(workoutBuilder != nil))")
+        
+        // Start Live Activity
+        if let workout = currentWorkout {
+            print("DEBUG: [WorkoutService] Starting Live Activity...")
+            await LiveActivityManager.shared.startActivity(for: workout)
+            print("DEBUG: [WorkoutService] Live Activity started")
+        }
+        
+        print("DEBUG: [WorkoutService] startWorkout completed successfully")
     }
     
     // MARK: - Pause/Resume
@@ -85,25 +103,27 @@ class WorkoutService: ObservableObject {
     // MARK: - End Workout
     
     func endWorkout() async throws -> Activity? {
-        guard let session = workoutSession, let builder = workoutBuilder else {
+        // Ensure we have an active workout
+        guard currentWorkout != nil else {
             throw WorkoutError.noActiveWorkout
         }
         
-        // End HK session
-        session.end()
-        
-        // End collection and save
-        let endDate = Date()
-        try await builder.endCollection(at: endDate)
-        
-        // Get the final workout from HealthKit
-        do {
-            try await builder.finishWorkout()
-        } catch {
-            print("Error finishing workout: \(error)")
+        // Try to end HealthKit session if it exists
+        if let session = workoutSession, let builder = workoutBuilder {
+            // End HK session
+            session.end()
+            
+            // End collection and save
+            let endDate = Date()
+            do {
+                try await builder.endCollection(at: endDate)
+                try await builder.finishWorkout()
+            } catch {
+                print("Error finishing HealthKit workout: \(error)")
+            }
         }
         
-        // Get our activity from the session
+        // Get our activity from the session (works regardless of HealthKit)
         let activity = currentWorkout?.end()
         
         // Save to local storage
@@ -133,8 +153,13 @@ class WorkoutService: ObservableObject {
     // MARK: - Discard Workout
     
     func discardWorkout() async {
-        workoutSession?.end()
-        try? await workoutBuilder?.discardWorkout()
+        // End HealthKit session if it exists
+        if let session = workoutSession {
+            session.end()
+        }
+        if let builder = workoutBuilder {
+            try? await builder.discardWorkout()
+        }
         
         await LiveActivityManager.shared.endActivity()
         
